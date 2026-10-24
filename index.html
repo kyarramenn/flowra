@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flowra v15 — Atur Keuanganmu</title>
+<title>Flowra v15.0.3 — Atur Keuanganmu</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -156,6 +156,8 @@
   }
   .sidebar-toggle svg { width: 22px; height: 22px; fill: white; transition: transform 0.3s ease; }
   .sidebar-toggle.open svg { transform: rotate(90deg); }
+  /* Drawer has its own close button; keep the toggle from covering the drawer header */
+  .sidebar-toggle.open { opacity: 0; visibility: hidden; pointer-events: none; transform: scale(0.8); }
 
   /* ─── SIDEBAR OVERLAY ────────────────────── */
   .sidebar-overlay {
@@ -174,7 +176,8 @@
 
   /* ─── SIDEBAR ─────────────────────────────── */
   .sidebar {
-    width: 260px;
+    width: min(260px, 86vw);
+    max-width: 100%;
     background: var(--bg2);
     border-right: 1px solid var(--border);
     display: flex;
@@ -182,6 +185,8 @@
     padding: 0;
     z-index: 260;
     height: 100vh;
+    height: 100dvh;
+    overscroll-behavior: contain;
     position: fixed;
     left: 0;
     top: 0;
@@ -197,11 +202,13 @@
 
   /* Sidebar Header */
   .sidebar-header {
-    padding: 20px 20px 16px;
+    padding: 20px 16px 16px;
+    padding-top: calc(16px + env(safe-area-inset-top, 0px));
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
+    min-width: 0;
     flex-shrink: 0;
     background: linear-gradient(135deg, rgba(232,98,26,0.08), transparent);
   }
@@ -215,25 +222,42 @@
     cursor: pointer;
   }
   .sidebar-logo-icon svg { width: 22px; height: 22px; fill: white; }
+  .sidebar-logo-text { flex: 1; min-width: 0; }
   .sidebar-logo-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-family: 'Syne', sans-serif;
     font-size: 20px;
+    line-height: 1.2;
     font-weight: 800;
     letter-spacing: -0.5px;
+    white-space: nowrap;
+  }
+  /* gradient clip only on the word; emoji stays outside so it never turns transparent */
+  .sidebar-logo-word {
     background: linear-gradient(135deg, var(--text), var(--amber2));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
+  .sidebar-logo-leaf { font-size: 16px; line-height: 1; flex-shrink: 0; }
   .sidebar-logo-ver {
     font-size: 10px;
+    line-height: 1.3;
     color: var(--text3);
-    margin-top: -2px;
+    margin-top: 2px;
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .sidebar-close {
     margin-left: auto;
-    width: 32px; height: 32px;
+    width: 40px; height: 40px;
     border-radius: 10px;
     border: 1px solid var(--border2);
     background: var(--bg3);
@@ -273,7 +297,7 @@
   }
   .sidebar-profile-mini-info { flex: 1; min-width: 0; }
   .sidebar-profile-mini-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sidebar-profile-mini-lvl { font-size: 10px; color: var(--orange2); margin-top: 1px; font-weight: 500; }
+  .sidebar-profile-mini-lvl { font-size: 10px; color: var(--orange2); margin-top: 1px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* nav-btn animation on sidebar open - pop in stagger */
   .sidebar.open .nav-btn {
@@ -300,6 +324,8 @@
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    overscroll-behavior: contain;
+    min-height: 0;
     padding: 10px 12px;
     display: flex;
     flex-direction: column;
@@ -321,6 +347,7 @@
   .sidebar-bottom {
     flex-shrink: 0;
     padding: 12px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     border-top: 1px solid var(--border);
     background: var(--bg2);
   }
@@ -339,7 +366,8 @@
 
   .nav-btn {
     width: 100%;
-    padding: 10px 14px;
+    padding: 12px 14px;
+    min-height: 44px;
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -362,7 +390,7 @@
     border-color: rgba(232,98,26,0.2);
   }
   .nav-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
-  .nav-btn-label { flex: 1; }
+  .nav-btn-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .nav-btn-badge-pill {
     font-size: 10px;
     background: var(--red);
@@ -388,6 +416,7 @@
     -webkit-overflow-scrolling: touch;
   }
   .main.active-page { display: block; }
+  body.sidebar-open .main { overflow: hidden; }
 
 
   /* ─── FLOATING ACTION BUTTON ────────────────── */
@@ -608,10 +637,11 @@
     background: linear-gradient(135deg, #1e1208 0%, #2a1a0a 50%, #1a1208 100%);
     border: 1px solid var(--border2);
     border-radius: var(--r2);
-    padding: 28px;
+    padding: clamp(16px, 5vw, 28px);
     position: relative;
     overflow: hidden;
     margin-bottom: 16px;
+    min-width: 0;
   }
   .balance-hero::before {
     content: '';
@@ -632,9 +662,12 @@
   .hero-label { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
   .hero-balance {
     font-family: 'Syne', sans-serif;
-    font-size: 44px;
+    font-size: clamp(28px, 9vw, 44px);
+    line-height: 1.15;
     font-weight: 800;
-    letter-spacing: -2px;
+    letter-spacing: -1px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
     background: linear-gradient(135deg, var(--text) 60%, var(--amber2));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -657,9 +690,10 @@
     transition: all 0.2s;
   }
   .hero-currency-badge:hover { background: rgba(232,98,26,0.25); }
-  .hero-meta { display: flex; gap: 24px; margin-top: 16px; flex-wrap: wrap; }
+  .hero-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px 24px; margin-top: 16px; }
+  .hero-meta-item { min-width: 0; }
   .hero-meta-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.6px; }
-  .hero-meta-val { font-size: 14px; font-weight: 500; color: var(--text2); margin-top: 2px; }
+  .hero-meta-val { overflow-wrap: anywhere; font-size: 14px; font-weight: 500; color: var(--text2); margin-top: 2px; }
 
   /* ─── QUICK ACTIONS ───────────────────────── */
   .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
@@ -1078,8 +1112,13 @@
     .currency-grid, .kurs-live-grid { gap: 16px; }
     #wp-picker, #admin-stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
     .page-body { padding: 16px; padding-bottom: 100px; }
-    .hero-balance { font-size: 32px; }
     .page-header { padding: 20px 16px 0; padding-top: 72px; }
+  }
+
+  @media (max-width: 360px) {
+    .sidebar-header { padding-left: 12px; padding-right: 12px; gap: 10px; }
+    .sidebar-logo-name { font-size: 18px; }
+    .sidebar-profile-mini { padding: 10px 12px; gap: 10px; }
   }
 
   /* ─── LOADING SCREEN ────────────────────────── */
@@ -1934,11 +1973,13 @@
     padding: 16px 20px;
     margin-bottom: 16px;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 14px;
+    gap: 10px 14px;
+    min-width: 0;
   }
   .mood-label { font-size: 12px; color: var(--text3); flex-shrink: 0; }
-  .mood-btns { display: flex; gap: 6px; flex: 1; }
+  .mood-btns { display: flex; gap: 6px; flex: 1 1 auto; min-width: 0; flex-wrap: wrap; }
   .mood-btn {
     flex: 1;
     height: 38px;
@@ -2060,6 +2101,93 @@
   }
   .theme-pill-btn.active-theme { background: rgba(232,98,26,0.18); }
   .theme-pill-btn:hover { background: var(--bg3); }
+
+
+  /* ─── FLOWRA v15.0.3: RESPONSIVE STABILITY PATCH ─────── */
+  html { min-width: 320px; }
+  body { -webkit-text-size-adjust: 100%; }
+  button, input, select, textarea { max-width: 100%; }
+  .main { overscroll-behavior-y: contain; }
+  .main .page-header, .main .page-body { min-width: 0; max-width: 100%; }
+  .page-header-row1, .page-header-row2, .header-actions { min-width: 0; flex-wrap: wrap; }
+  .page-header-row1 > div { min-width: 0; }
+  .page-title { max-width: 100%; line-height: 1.25; overflow-wrap: anywhere; }
+  .card, .balance-hero, .currency-panel, .goal-card, .modal, .section-header { min-width: 0; }
+  .card-value, .hero-meta-val, .hero-balance { overflow-wrap: anywhere; }
+  .balance-hero {
+    border-color: rgba(232,98,26,0.42);
+    box-shadow: 0 14px 34px rgba(0,0,0,0.18);
+  }
+  .hero-label { color: var(--orange2); font-weight: 700; }
+  .hero-balance { font-size: clamp(30px, 7.6vw, 48px); letter-spacing: -0.8px; }
+  .hero-meta { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  #page-home .page-body { padding-top: 16px; }
+  #page-home .accent-line { margin-bottom: 14px; }
+  .tx-amount { max-width: 45%; overflow-wrap: anywhere; }
+  .modal-overlay {
+    padding: max(12px, env(safe-area-inset-top, 0px)) 12px max(12px, env(safe-area-inset-bottom, 0px));
+  }
+  .modal {
+    width: min(440px, 100%);
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
+  }
+  .form-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #admin-stats-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  .admin-local-warning {
+    border: 1px solid rgba(245,166,35,0.35);
+    background: rgba(245,166,35,0.08);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 18px;
+    color: var(--text2);
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .admin-local-warning strong { display: block; color: #f5b942; font-size: 13px; margin-bottom: 4px; }
+  .admin-local-warning p { margin: 0; }
+  .admin-search { margin-bottom: 12px; }
+  .admin-search:focus { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(232,98,26,0.12); }
+
+  @media (max-width: 640px) {
+    .page-header { padding-left: 16px; padding-right: 16px; }
+    .page-header-row1 { align-items: flex-start; gap: 12px; }
+    .header-actions { width: 100%; justify-content: flex-start; }
+    .page-title { font-size: clamp(18px, 5vw, 22px); }
+    #page-home .page-header { padding-top: 68px; }
+    #page-home .page-body { padding-top: 10px; }
+    #page-home .balance-hero { padding: 18px 16px; margin-bottom: 14px; }
+    #page-home .hero-balance { font-size: clamp(27px, 8.2vw, 38px); }
+    #page-home .hero-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; }
+    #page-home .hero-meta-item:last-child { grid-column: 1 / -1; }
+    .quick-actions { gap: 10px; }
+    .card { padding: 18px; }
+    .card-value { font-size: clamp(20px, 5.6vw, 26px); }
+    .modal { padding: 20px 16px; }
+    .form-row { grid-template-columns: 1fr; }
+    #admin-stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; }
+    #page-admin .page-body { padding-top: 16px; }
+    .toast { right: 12px; top: calc(12px + env(safe-area-inset-top, 0px)); }
+    .bottom-nav {
+      height: calc(60px + env(safe-area-inset-bottom, 0px));
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .fab { bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 16px); }
+  }
+  @media (max-width: 360px) {
+    .sidebar-header { gap: 8px; }
+    .sidebar-logo-name { font-size: 17px; }
+    .sidebar-close { width: 36px; height: 36px; }
+    #page-home .hero-balance { font-size: 26px; }
+    #page-home .hero-meta { grid-template-columns: 1fr; }
+    #page-home .hero-meta-item:last-child { grid-column: auto; }
+    .modal-actions { flex-wrap: wrap; }
+    .modal-actions .btn { min-width: 100px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+
 </style>
 </head>
 <body>
@@ -2123,7 +2251,7 @@
     <div class="picker-heading">Siapa yang akan masuk?</div>
     <div class="picker-sub" id="picker-sub">Pilih profil atau buat akun baru (maks. 3 akun)</div>
     <div class="profile-grid" id="profile-grid"></div>
-    <div class="picker-footer">🔐 Data lokal · Aman · Flowra v15.0.0</div>
+    <div class="picker-footer">🔐 Data lokal · Aman · Flowra v15.0.3</div>
   </div>
 </div>
 
@@ -2346,11 +2474,11 @@
         <circle cx="16" cy="26" r="1.5" fill="white" opacity="0.7"/>
       </svg>
     </div>
-    <div>
-      <div class="sidebar-logo-name">Flowra 🌿</div>
-      <div class="sidebar-logo-ver">v15.0.0 · 2026</div>
+    <div class="sidebar-logo-text">
+      <div class="sidebar-logo-name"><span class="sidebar-logo-word">Flowra</span><span class="sidebar-logo-leaf" aria-hidden="true">🌿</span></div>
+      <div class="sidebar-logo-ver">v15.0.3 · 2026</div>
     </div>
-    <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+    <button class="sidebar-close" onclick="closeSidebar()" aria-label="Tutup menu">✕</button>
   </div>
 
   <!-- Mini Profile -->
@@ -2426,7 +2554,7 @@
       <button class="btn btn-ghost" style="flex:1;justify-content:center;font-size:12px;padding:8px" onclick="doSwitchProfile();closeSidebar()">🔄 Ganti</button>
       <button class="btn btn-red" style="flex:1;justify-content:center;font-size:12px;padding:8px" onclick="doLogout()">🔐 Logout</button>
     </div>
-    <div style="text-align:center;font-size:10px;color:var(--text3)">Flowra v15 · Data lokal & aman 🔐</div>
+    <div style="text-align:center;font-size:10px;color:var(--text3)">Flowra v15.0.3 · Data tersimpan di browser ini</div>
   </div>
 </nav>
 
@@ -2490,42 +2618,6 @@
   <div class="page-body">
     <div class="accent-line"></div>
 
-    <!-- Mood Tracker Harian -->
-    <div class="mood-bar">
-      <div class="mood-label">😊 Mood hari ini</div>
-      <div class="mood-btns" id="mood-btns">
-        <button class="mood-btn" onclick="setMood('😢')" data-mood="😢" title="Sedih">😢</button>
-        <button class="mood-btn" onclick="setMood('😕')" data-mood="😕" title="Kurang">😕</button>
-        <button class="mood-btn" onclick="setMood('😐')" data-mood="😐" title="Biasa">😐</button>
-        <button class="mood-btn" onclick="setMood('🙂')" data-mood="🙂" title="Oke">🙂</button>
-        <button class="mood-btn" onclick="setMood('🤩')" data-mood="🤩" title="Sangat Baik!">🤩</button>
-      </div>
-      <div class="streak-badge" id="streak-badge" title="Streak catat transaksi">🔥 <span id="streak-num">0</span> hari</div>
-    </div>
-
-    <!-- Financial Health Score -->
-    <div class="health-score-card" id="health-score-card"></div>
-
-    <!-- Quotes Banner -->
-    <div class="quote-banner" onclick="nextQuote()" title="Klik untuk quote baru">
-      <div class="quote-icon">💬</div>
-      <div>
-        <div class="quote-text" id="quote-text">Seseorang duduk di bawah naungan pohon hari ini karena seseorang menanamnya bertahun-tahun lalu.</div>
-        <div class="quote-author" id="quote-author">— Warren Buffett</div>
-      </div>
-      <div class="quote-refresh" onclick="event.stopPropagation();nextQuote()">↻</div>
-    </div>
-
-    <!-- Profile Card -->
-    <div class="profile-card" onclick="showPage('settings')" title="Buka Pengaturan">
-      <div class="profile-avatar" id="profile-avatar" style="overflow:hidden">FL</div>
-      <div class="profile-info">
-        <div class="profile-name" id="profile-name">Pengguna Flowra</div>
-        <div class="profile-note" id="profile-note">Atur keuanganmu dengan cerdas</div>
-      </div>
-      <div class="profile-lvl" id="profile-lvl">Pemula</div>
-    </div>
-
     <!-- Balance Hero -->
     <div class="balance-hero">
       <div class="hero-label">Total Saldo</div>
@@ -2579,6 +2671,42 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Mood Tracker Harian -->
+    <div class="mood-bar">
+      <div class="mood-label">😊 Mood hari ini</div>
+      <div class="mood-btns" id="mood-btns">
+        <button class="mood-btn" onclick="setMood('😢')" data-mood="😢" title="Sedih">😢</button>
+        <button class="mood-btn" onclick="setMood('😕')" data-mood="😕" title="Kurang">😕</button>
+        <button class="mood-btn" onclick="setMood('😐')" data-mood="😐" title="Biasa">😐</button>
+        <button class="mood-btn" onclick="setMood('🙂')" data-mood="🙂" title="Oke">🙂</button>
+        <button class="mood-btn" onclick="setMood('🤩')" data-mood="🤩" title="Sangat Baik!">🤩</button>
+      </div>
+      <div class="streak-badge" id="streak-badge" title="Streak catat transaksi">🔥 <span id="streak-num">0</span> hari</div>
+    </div>
+
+    <!-- Financial Health Score -->
+    <div class="health-score-card" id="health-score-card"></div>
+
+    <!-- Quotes Banner -->
+    <div class="quote-banner" onclick="nextQuote()" title="Klik untuk quote baru">
+      <div class="quote-icon">💬</div>
+      <div>
+        <div class="quote-text" id="quote-text">Seseorang duduk di bawah naungan pohon hari ini karena seseorang menanamnya bertahun-tahun lalu.</div>
+        <div class="quote-author" id="quote-author">— Warren Buffett</div>
+      </div>
+      <div class="quote-refresh" onclick="event.stopPropagation();nextQuote()">↻</div>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="profile-card" onclick="showPage('settings')" title="Buka Pengaturan">
+      <div class="profile-avatar" id="profile-avatar" style="overflow:hidden">FL</div>
+      <div class="profile-info">
+        <div class="profile-name" id="profile-name">Pengguna Flowra</div>
+        <div class="profile-note" id="profile-note">Atur keuanganmu dengan cerdas</div>
+      </div>
+      <div class="profile-lvl" id="profile-lvl">Pemula</div>
     </div>
 
     <!-- Quick Actions -->
@@ -3133,7 +3261,7 @@
     <!-- Tentang -->
     <div class="card">
       <div class="settings-section-title">ℹ️ Tentang Flowra</div>
-      <div class="data-info-row"><span>Versi</span><span>15.0.0</span></div>
+      <div class="data-info-row"><span>Versi</span><span>15.0.3</span></div>
       <div class="data-info-row"><span>Build</span><span>2026</span></div>
       <div class="data-info-row"><span>Platform</span><span>Web App</span></div>
       <div style="margin-top:14px;font-size:12px;color:var(--text3);line-height:1.7">
@@ -3347,17 +3475,21 @@
   </div>
   <div class="page-body">
     <div class="accent-line" style="background:linear-gradient(90deg,#f59e0b,#ef4444)"></div>
+    <div class="admin-local-warning" role="note" aria-label="Status keamanan panel Admin">
+      <strong>⚠️ Admin Lokal — otorisasi backend belum aktif</strong>
+      <p>Versi file ini menyimpan akun dan transaksi di browser (localStorage). Panel ini bukan sistem Admin lintas pengguna yang diamankan server. Jangan gunakan untuk mengelola data online atau data pengguna lain sebelum autentikasi Supabase, pemeriksaan role di backend, dan kebijakan RLS benar-benar dikonfigurasi serta diuji.</p>
+    </div>
 
     <!-- Admin identity card -->
     <div style="background:linear-gradient(135deg,rgba(245,158,11,0.08),rgba(239,68,68,0.06));border:1px solid rgba(245,158,11,0.25);border-radius:16px;padding:20px;margin-bottom:20px;display:flex;align-items:center;gap:16px">
       <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 4px 16px rgba(245,158,11,0.3)">🛡️</div>
       <div style="flex:1;min-width:0">
         <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--text)">Administrator</div>
-        <div style="font-size:12px;color:var(--text3);margin-top:2px">Akses penuh ke semua fitur sistem Flowra</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px">Panel administrasi lokal pada browser ini</div>
       </div>
       <div style="text-align:right;flex-shrink:0">
         <div style="font-size:11px;color:var(--text3)">Status</div>
-        <div style="font-size:13px;font-weight:700;color:#4caf6e">● Online</div>
+        <div style="font-size:13px;font-weight:700;color:#f5b942">● Lokal</div>
       </div>
     </div>
 
@@ -3394,6 +3526,7 @@
           <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px" onclick="renderAdminUsers()">↻ Refresh</button>
         </div>
       </div>
+      <input class="form-input admin-search" id="admin-user-search" type="search" autocomplete="off" placeholder="Cari nama atau username pengguna…" aria-label="Cari pengguna Admin" oninput="renderAdminUsers()">
       <div id="admin-user-list" style="margin-top:4px"></div>
     </div>
 
@@ -3671,11 +3804,10 @@ function renderProfilePicker() {
       <div class="picker-add-hint">Sisa ${MAX_PROFILES - userList.length} slot</div>
     </div>`;
   }
-  // Add admin quick-login button at bottom
-  html += `<div onclick="quickAdminLogin()" style="grid-column:1/-1;margin-top:8px;padding:10px 16px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:12px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background 0.2s" onmouseover="this.style.background='rgba(239,68,68,0.14)'" onmouseout="this.style.background='rgba(239,68,68,0.08)'">
-    <span style="font-size:20px">🛡️</span>
-    <div><div style="font-size:13px;font-weight:600;color:#ef4444">Masuk sebagai Admin</div><div style="font-size:11px;color:var(--text3)">Akses panel kontrol</div></div>
-    <span style="margin-left:auto;font-size:11px;color:var(--text3)">→</span>
+  // Fail closed: admin access must not be available through a public frontend shortcut.
+  html += `<div class="admin-local-warning" style="grid-column:1/-1;margin-top:8px">
+    <strong>🛡️ Akses Admin dikunci</strong>
+    <p>Panel Admin hanya dapat diaktifkan setelah autentikasi Supabase, role admin di backend, dan kebijakan RLS dikonfigurasi serta diuji. File lokal ini belum memenuhi syarat tersebut.</p>
   </div>`;
   grid.innerHTML = html;
 }
@@ -3845,6 +3977,12 @@ function doLogin() {
   }
 
   const users = JSON.parse(localStorage.getItem('flowra_users') || '{}');
+  if (username.toLowerCase() === ADMIN_USER || (users[username] && users[username].isAdmin)) {
+    errEl.textContent = 'Login Admin dinonaktifkan pada mode lokal. Hubungkan autentikasi dan role Admin di backend terlebih dahulu.';
+    errEl.classList.add('show');
+    document.getElementById('login-password').value = '';
+    return;
+  }
   if (users[username] && users[username].password === btoa(password)) {
     // Load user state from their own key
     const savedState = localStorage.getItem('flowra_v2_' + username);
@@ -3883,6 +4021,11 @@ function doRegister() {
 
   if (!name || !username || !password || !confirm) {
     errEl.textContent = 'Semua kolom wajib diisi.';
+    errEl.classList.add('show');
+    return;
+  }
+  if (username.toLowerCase() === 'admin') {
+    errEl.textContent = 'Username admin dicadangkan untuk role yang dikelola backend.';
     errEl.classList.add('show');
     return;
   }
@@ -4202,25 +4345,20 @@ function init() {
     if (savedUser) {
       const users = getUsers();
       if (users[savedUser]) {
-        // Admin auto-login — doesn't need valid state
-        if (users[savedUser].isAdmin) {
-          state = freshState();
-          state.settings.name = users[savedUser].name || 'Administrator';
-          currentUser = savedUser;
-          enterApp();
-          return;
-        }
-        const savedState = localStorage.getItem('flowra_v2_' + savedUser);
-        if (savedState) {
-          try {
-            const parsed = JSON.parse(savedState);
-            if (parsed && parsed.settings) {
-              state = patchState(parsed);
-              currentUser = savedUser;
-              enterApp();
-              return;
-            }
-          } catch(e) {}
+        // Local admin flags are untrusted; clear legacy admin sessions without deleting their stored data.
+        if (savedUser.toLowerCase() !== ADMIN_USER && !users[savedUser].isAdmin) {
+          const savedState = localStorage.getItem('flowra_v2_' + savedUser);
+          if (savedState) {
+            try {
+              const parsed = JSON.parse(savedState);
+              if (parsed && parsed.settings) {
+                state = patchState(parsed);
+                currentUser = savedUser;
+                enterApp();
+                return;
+              }
+            } catch(e) {}
+          }
         }
       }
       localStorage.removeItem('flowra_current_user');
@@ -5696,64 +5834,26 @@ function launchConfetti() {
   }
 }
 
-// ─── ADMIN ACCOUNT ─────────────────────────────────────────
+// ─── ADMIN ACCOUNT: FAIL-CLOSED UNTIL BACKEND AUTHORIZATION ──
 const ADMIN_USER = 'admin';
-const ADMIN_PASS = 'admin123';
 const ADMIN_NAME = 'Administrator';
 
-function seedAdminAccount() {
-  const users = getUsers();
-  if (!users[ADMIN_USER]) {
-    users[ADMIN_USER] = {
-      name: ADMIN_NAME,
-      password: btoa(ADMIN_PASS),
-      isAdmin: true,
-      skipPicker: true,   // tidak tampil di profile picker
-      tag: 'Admin',
-      tagColor: '#ef4444'
-    };
-    saveUsers(users);
-  } else {
-    // Pastikan flag selalu ada meski akun sudah ada sebelumnya
-    users[ADMIN_USER].isAdmin = true;
-    users[ADMIN_USER].skipPicker = true;
-    if (!users[ADMIN_USER].tag) { users[ADMIN_USER].tag = 'Admin'; users[ADMIN_USER].tagColor = '#ef4444'; }
-    saveUsers(users);
-  }
-}
+// This static/localStorage build has no trusted server-side role source.
+// Never create a default privileged account in the browser.
+function seedAdminAccount() { return false; }
 
 function quickAdminLogin() {
-  // Direct login as admin — no PIN overlay needed
-  const users = getUsers();
-  const data = users[ADMIN_USER];
-  if (!data) { seedAdminAccount(); }
-  const savedState = localStorage.getItem('flowra_v2_' + ADMIN_USER);
-  if (savedState) {
-    try { const p = JSON.parse(savedState); state = p && p.settings ? patchState(p) : freshState(); }
-    catch(e) { state = freshState(); }
-  } else { state = freshState(); }
-  state.settings.name = ADMIN_NAME;
-  currentUser = ADMIN_USER;
-  localStorage.setItem('flowra_current_user', ADMIN_USER);
-  hideProfilePicker();
-  setTimeout(() => enterApp(), 100);
+  showToast('Akses Admin dikunci sampai autentikasi dan role backend dikonfigurasi.', 'error');
+  return false;
 }
 
-function checkAdminAutofill(val) {
-  const pwEl = document.getElementById('login-password');
-  if (!pwEl) return;
-  if (val.trim().toLowerCase() === ADMIN_USER) {
-    pwEl.value = ADMIN_PASS;
-    pwEl.style.transition = 'border-color 0.3s,box-shadow 0.3s';
-    pwEl.style.borderColor = '#f59e0b';
-    pwEl.style.boxShadow = '0 0 0 3px rgba(245,158,11,0.15)';
-    setTimeout(() => { pwEl.style.borderColor = ''; pwEl.style.boxShadow = ''; }, 1500);
-  } else {
-    if (pwEl.value === ADMIN_PASS) pwEl.value = '';
-  }
+function checkAdminAutofill() {
+  // Deliberately no password autofill or embedded administrator credential.
+  return false;
 }
 
-function isAdmin() { return currentUser === ADMIN_USER; }
+// Fail closed. A local username or localStorage flag can never confer Admin privileges.
+function isAdmin() { return false; }
 
 function renderAdminPanel() {
   const users = getUsers();
@@ -5783,7 +5883,8 @@ function renderAdminUsers() {
   const el = document.getElementById('admin-user-list');
   if (!el) return;
   const users = getUsers();
-  const list = Object.entries(users).filter(([u]) => u !== ADMIN_USER);
+  const query = (document.getElementById('admin-user-search')?.value || '').trim().toLowerCase();
+  const list = Object.entries(users).filter(([u, data]) => u !== ADMIN_USER && `${u} ${data.name || ''}`.toLowerCase().includes(query));
   if (list.length === 0) {
     el.innerHTML = '<div class="empty" style="padding:24px 0"><div class="empty-icon">👤</div><div class="empty-text">Belum ada pengguna terdaftar</div></div>';
     return;
@@ -6342,6 +6443,7 @@ function openSidebar() {
     lvlEl.textContent = `⭐ ${typeof lvl === 'object' ? lvl.name : lvl} · Klik untuk edit profil`;
   }
   document.body.style.overflow = 'hidden';
+  document.body.classList.add('sidebar-open');
 }
 
 function closeSidebar() {
@@ -6352,6 +6454,7 @@ function closeSidebar() {
   overlay.classList.remove('open');
   if (toggleBtn) toggleBtn.classList.remove('open');
   document.body.style.overflow = '';
+  document.body.classList.remove('sidebar-open');
 }
 
 // Close sidebar on Escape key
